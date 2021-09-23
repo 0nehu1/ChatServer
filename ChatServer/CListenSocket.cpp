@@ -21,3 +21,21 @@ void CListenSocket::OnAccept(int nErrorCode)
 
 	CAsyncSocket::OnAccept(nErrorCode);
 }
+
+void CListenSocket::CloseClientSocket(CSocket* pClient)
+{
+	POSITION pos;
+	pos = m_ptrClientSocketList.Find(pClient);
+	if (pos != NULL)
+	{
+		if (pClient != NULL)
+		{
+			pClient->ShutDown();
+			pClient->Close();
+		}
+
+		m_ptrClientSocketList.RemoveAt(pos);
+		delete pClient;
+	}
+
+}
