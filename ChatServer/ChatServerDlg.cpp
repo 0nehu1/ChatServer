@@ -12,6 +12,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+#include "CClientSocket.h"
 
 
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
@@ -67,6 +68,7 @@ BEGIN_MESSAGE_MAP(CChatServerDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 
@@ -103,6 +105,17 @@ BOOL CChatServerDlg::OnInitDialog()
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 
+	if (m_ListenSocket.Create(21000, SOCK_STREAM))
+	{
+		if (!m_ListenSocket.Listen())
+		{
+			AfxMessageBox(_T("ERROR: Listen() return FALSE"));
+		}
+	}
+	else
+	{
+		AfxMessageBox(_T("ERROR: Failed to create server socket!"));
+	}
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
 
@@ -155,3 +168,31 @@ HCURSOR CChatServerDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+
+
+void CChatServerDlg::OnDestroy()
+{
+	CDialogEx::OnDestroy();
+
+	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
+
+	POSITION pos;
+	pos = m_ListenSocket.m_ptrClientSocketList.GetHeadPosition();
+	CClientSocket* pClient = NULL;
+
+	while (pos != NULL)
+	{
+		pClient = (CClientSocket*)
+			m_ListenSocket.m_ptrClientSocketList.GetNext(pos);
+		if (pClient != NULL)
+		{
+			pClient->ShutDown();
+			pClient->Close();
+
+			delete pClient;
+		}
+	}
+
+	m_ListenSocket.ShutDown();
+	m_ListenSocket.Close();
+}

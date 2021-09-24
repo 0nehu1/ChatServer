@@ -3,6 +3,14 @@
 #include "CClientSocket.h"
 #include <afxsock.h>
 
+CListenSocket::CListenSocket()
+{
+}
+
+CListenSocket::~CListenSocket()
+{
+}
+
 void CListenSocket::OnAccept(int nErrorCode)
 {
 	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
@@ -38,4 +46,20 @@ void CListenSocket::CloseClientSocket(CSocket* pClient)
 		delete pClient;
 	}
 
+}
+
+void CListenSocket::SendChatDataAll(TCHAR* pszMessage)
+{
+	POSITION pos;
+	pos = m_ptrClientSocketList.GetHeadPosition();
+	CClientSocket* pClient = NULL;
+
+	while (pos != NULL)
+	{
+		pClient = (CClientSocket*)m_ptrClientSocketList.GetNext(pos);
+		if (pClient != NULL)
+		{
+			pClient->Send(pszMessage, lstrlen(pszMessage) * 2);
+		}
+	}
 }

@@ -36,4 +36,5 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	CListBox m_List;
+	afx_msg void OnDestroy();
 };
